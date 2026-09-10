@@ -153,19 +153,19 @@ export function StatementPage({ data }: { data: CustomerStatementData }) {
 
         <View style={styles.summaryBox}>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>전기이월잔액</Text>
+            <Text style={styles.summaryLabel}>이월잔액</Text>
             <Text style={styles.summaryValue}>{won(openingBalance)}</Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>당기 공급가액</Text>
+            <Text style={styles.summaryLabel}>당월 공급가액</Text>
             <Text style={styles.summaryValue}>{won(totalSupply)}</Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>당기 부가세</Text>
+            <Text style={styles.summaryLabel}>당월 부가세</Text>
             <Text style={styles.summaryValue}>{won(totalVat)}</Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>당기 수금액</Text>
+            <Text style={styles.summaryLabel}>당월 수금액</Text>
             <Text style={styles.summaryValue}>-{won(totalPayment)}</Text>
           </View>
           <View style={[styles.summaryRow, { marginTop: 4, borderTop: "1pt solid #d1d5db", paddingTop: 4 }]}>

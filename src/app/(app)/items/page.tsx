@@ -57,7 +57,7 @@ export default async function ItemsPage({
         </button>
       </form>
 
-      <div className="overflow-hidden rounded-md border border-gray-200 bg-white">
+      <div className="overflow-x-auto rounded-md border border-gray-200 bg-white">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-left text-gray-500">
             <tr>

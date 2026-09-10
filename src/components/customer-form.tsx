@@ -15,7 +15,7 @@ export function CustomerForm({
         <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
       )}
       <Field label="거래처명 *" name="name" defaultValue={customer?.name} required />
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field
           label="사업자번호"
           name="biz_reg_no"
@@ -23,12 +23,12 @@ export function CustomerForm({
         />
         <Field label="대표자" name="ceo_name" defaultValue={customer?.ceo_name ?? ""} />
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label="연락처" name="phone" defaultValue={customer?.phone ?? ""} />
         <Field label="이메일" name="email" defaultValue={customer?.email ?? ""} />
       </div>
       <Field label="주소" name="address" defaultValue={customer?.address ?? ""} />
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field
           label="담당자"
           name="manager_name"
@@ -40,7 +40,7 @@ export function CustomerForm({
           defaultValue={customer?.kakao_contact ?? ""}
         />
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field
           label="결제조건"
           name="payment_terms"

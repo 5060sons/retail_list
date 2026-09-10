@@ -46,6 +46,15 @@ export default async function TransactionsPage({
   const { data } = await query;
   const rows = (data ?? []) as unknown as Row[];
 
+  const totalSupply = rows.reduce(
+    (sum, row) => sum + row.transaction_lines.reduce((s, l) => s + Number(l.supply_amount), 0),
+    0
+  );
+  const totalVat = rows.reduce(
+    (sum, row) => sum + row.transaction_lines.reduce((s, l) => s + Number(l.vat_amount), 0),
+    0
+  );
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -106,15 +115,15 @@ export default async function TransactionsPage({
         </button>
       </form>
 
-      <div className="overflow-hidden rounded-md border border-gray-200 bg-white">
+      <div className="overflow-x-auto rounded-md border border-gray-200 bg-white">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-left text-gray-500">
             <tr>
               <th className="px-4 py-2 font-medium">거래일</th>
               <th className="px-4 py-2 font-medium">거래처</th>
-              <th className="px-4 py-2 font-medium">유형</th>
               <th className="px-4 py-2 font-medium text-right">공급가</th>
               <th className="px-4 py-2 font-medium text-right">부가세</th>
+              <th className="px-4 py-2 font-medium">유형</th>
             </tr>
           </thead>
           <tbody>
@@ -138,9 +147,9 @@ export default async function TransactionsPage({
                     </Link>
                   </td>
                   <td className="px-4 py-2">{row.customers?.name ?? "-"}</td>
-                  <td className="px-4 py-2">{typeLabel}</td>
                   <td className="px-4 py-2 text-right">{formatCurrency(supply)}</td>
                   <td className="px-4 py-2 text-right">{formatCurrency(vat)}</td>
+                  <td className="px-4 py-2">{typeLabel}</td>
                 </tr>
               );
             })}
@@ -152,6 +161,18 @@ export default async function TransactionsPage({
               </tr>
             )}
           </tbody>
+          {rows.length > 0 && (
+            <tfoot>
+              <tr className="border-t border-gray-200 bg-gray-50 font-medium">
+                <td className="px-4 py-2" colSpan={2}>
+                  합계
+                </td>
+                <td className="px-4 py-2 text-right">{formatCurrency(totalSupply)}</td>
+                <td className="px-4 py-2 text-right">{formatCurrency(totalVat)}</td>
+                <td className="px-4 py-2"></td>
+              </tr>
+            </tfoot>
+          )}
         </table>
       </div>
     </div>

@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/auth";
 import { currentYearMonth, monthRange } from "@/lib/format";
-import { closeCustomerPeriod } from "./actions";
+import { isEmailConfigured } from "@/lib/email";
+import { closeCustomerPeriod, sendStatementEmail } from "./actions";
 import type { Customer, CustomerClosing } from "@/lib/supabase/types";
 
 export default async function CustomerClosingPage({
@@ -36,6 +37,9 @@ export default async function CustomerClosingPage({
   const pdfHref = customer_id
     ? `/api/statements/customer/pdf?customer_id=${customer_id}&from=${periodFrom}&to=${periodTo}`
     : null;
+
+  const selectedCustomer = typedCustomers.find((c) => c.id === customer_id);
+  const emailReady = isEmailConfigured();
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -104,10 +108,37 @@ export default async function CustomerClosingPage({
         </div>
       )}
 
+      {customer_id && emailReady && (
+        <form
+          action={sendStatementEmail}
+          className="flex flex-wrap items-end gap-3 rounded-md border border-gray-200 bg-white p-4 text-sm"
+        >
+          <input type="hidden" name="customer_id" value={customer_id} />
+          <input type="hidden" name="from" value={periodFrom} />
+          <input type="hidden" name="to" value={periodTo} />
+          <label>
+            <span className="mb-1 block text-gray-700">받는 이메일</span>
+            <input
+              type="email"
+              name="recipient_email"
+              required
+              defaultValue={selectedCustomer?.email ?? ""}
+              className="w-64 rounded-md border border-gray-300 px-2 py-1.5"
+            />
+          </label>
+          <button
+            type="submit"
+            className="rounded-md border border-gray-300 px-4 py-2 hover:bg-gray-50"
+          >
+            이메일로 거래명세서 보내기
+          </button>
+        </form>
+      )}
+
       {customer_id && (
         <div>
           <h2 className="mb-2 text-sm font-semibold">이 거래처의 마감 이력</h2>
-          <div className="overflow-hidden rounded-md border border-gray-200 bg-white">
+          <div className="overflow-x-auto rounded-md border border-gray-200 bg-white">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 text-left text-gray-500">
                 <tr>

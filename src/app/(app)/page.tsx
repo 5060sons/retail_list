@@ -68,7 +68,7 @@ export default async function DashboardPage() {
             전체 거래처 보기
           </Link>
         </div>
-        <div className="overflow-hidden rounded-md border border-gray-200 bg-white">
+        <div className="overflow-x-auto rounded-md border border-gray-200 bg-white">
           {outstanding.length === 0 ? (
             <p className="p-4 text-sm text-gray-500">미수금이 있는 거래처가 없습니다.</p>
           ) : (

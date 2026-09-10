@@ -103,7 +103,7 @@ export default async function CustomerDetailPage({
 
       <div>
         <h2 className="mb-2 text-sm font-semibold">거래/수금 이력</h2>
-        <div className="overflow-hidden rounded-md border border-gray-200 bg-white">
+        <div className="overflow-x-auto rounded-md border border-gray-200 bg-white">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-left text-gray-500">
               <tr>

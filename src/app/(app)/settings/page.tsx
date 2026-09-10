@@ -52,7 +52,7 @@ export default async function SettingsPage({
         <h2 className="text-sm font-semibold">공급자(회사) 정보 — 거래명세서에 표시됩니다</h2>
         <form
           action={updateCompanySettings}
-          className="grid grid-cols-2 gap-3 rounded-md border border-gray-200 bg-white p-4 text-sm"
+          className="grid grid-cols-1 gap-3 rounded-md border border-gray-200 bg-white p-4 text-sm sm:grid-cols-2"
         >
           <Field label="상호" name="name" defaultValue={typedCompany?.name ?? ""} disabled={profile.role !== "admin"} />
           <Field label="사업자번호" name="biz_reg_no" defaultValue={typedCompany?.biz_reg_no ?? ""} disabled={profile.role !== "admin"} />
@@ -60,11 +60,11 @@ export default async function SettingsPage({
           <Field label="연락처" name="phone" defaultValue={typedCompany?.phone ?? ""} disabled={profile.role !== "admin"} />
           <Field label="업태" name="business_type" defaultValue={typedCompany?.business_type ?? ""} disabled={profile.role !== "admin"} />
           <Field label="종목" name="business_item" defaultValue={typedCompany?.business_item ?? ""} disabled={profile.role !== "admin"} />
-          <div className="col-span-2">
+          <div className="sm:col-span-2">
             <Field label="주소" name="address" defaultValue={typedCompany?.address ?? ""} disabled={profile.role !== "admin"} />
           </div>
           {profile.role === "admin" && (
-            <div className="col-span-2">
+            <div className="sm:col-span-2">
               <button type="submit" className="rounded-md bg-gray-900 px-4 py-2 text-white">
                 저장
               </button>
@@ -76,7 +76,7 @@ export default async function SettingsPage({
       {profile.role === "admin" && profiles && (
         <section className="space-y-3">
           <h2 className="text-sm font-semibold">사용자 관리</h2>
-          <div className="overflow-hidden rounded-md border border-gray-200 bg-white">
+          <div className="overflow-x-auto rounded-md border border-gray-200 bg-white">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 text-left text-gray-500">
                 <tr>
