@@ -55,6 +55,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#f3f4f6",
     fontWeight: "bold",
   },
+  tableTotalRow: {
+    flexDirection: "row",
+    backgroundColor: "#f9fafb",
+    fontWeight: "bold",
+    borderTop: "1pt solid #d1d5db",
+  },
   cell: {
     padding: 5,
     borderRight: "1pt solid #e5e7eb",
@@ -97,6 +103,7 @@ export function StatementPage({ data }: { data: CustomerStatementData }) {
 
   const isPurchase = customer.partner_type === "supplier";
   const directionTag = isPurchase ? "[매입]" : "[매출]";
+  const totalQuantity = lines.reduce((sum, l) => sum + Number(l.quantity), 0);
 
   const companyBox = (
     <>
@@ -163,6 +170,16 @@ export function StatementPage({ data }: { data: CustomerStatementData }) {
               </Text>
             </View>
           )}
+          {lines.length > 0 && (
+            <View style={styles.tableTotalRow}>
+              <Text style={[styles.cell, { width: "38%" }]}>합계</Text>
+              <Text style={[styles.cell, styles.cQty]}>{totalQuantity}</Text>
+              <Text style={[styles.cell, styles.cPrice]}></Text>
+              <Text style={[styles.cell, styles.cSupply]}>{won(totalSupply)}</Text>
+              <Text style={[styles.cell, styles.cVat]}>{won(totalVat)}</Text>
+              <Text style={[styles.cell, styles.cType, { borderRight: "none" }]}></Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.summaryBox}>
@@ -208,6 +225,12 @@ export function StatementPage({ data }: { data: CustomerStatementData }) {
                   <Text style={[styles.cell, { width: "40%", borderRight: "none" }]}>{p.memo ?? "-"}</Text>
                 </View>
               ))}
+              <View style={styles.tableTotalRow}>
+                <Text style={[styles.cell, { width: "20%" }]}>합계</Text>
+                <Text style={[styles.cell, { width: "20%", textAlign: "right" }]}>{won(totalPayment)}</Text>
+                <Text style={[styles.cell, { width: "20%" }]}></Text>
+                <Text style={[styles.cell, { width: "40%", borderRight: "none" }]}></Text>
+              </View>
             </View>
           </View>
         )}
