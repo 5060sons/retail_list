@@ -93,11 +93,6 @@ export default async function CustomerClosingPage({
           >
             거래명세서 PDF 보기/다운로드
           </a>
-          <KakaoShareButton
-            getShareUrl={createShareLink.bind(null, customer_id, periodFrom, periodTo)}
-            title={`${selectedCustomer?.name ?? ""} 거래명세서`}
-            description={`기간: ${periodFrom} ~ ${periodTo}`}
-          />
           {profile.role === "admin" && (
             <form action={closeCustomerPeriod}>
               <input type="hidden" name="customer_id" value={customer_id} />
@@ -138,7 +133,22 @@ export default async function CustomerClosingPage({
           >
             이메일로 거래명세서 보내기
           </button>
+          <KakaoShareButton
+            getShareUrl={createShareLink.bind(null, customer_id, periodFrom, periodTo)}
+            title={`${selectedCustomer?.name ?? ""} 거래명세서`}
+            description={`기간: ${periodFrom} ~ ${periodTo}`}
+          />
         </form>
+      )}
+
+      {customer_id && !emailReady && (
+        <div className="flex flex-wrap items-end gap-3 rounded-md border border-gray-200 bg-white p-4 text-sm">
+          <KakaoShareButton
+            getShareUrl={createShareLink.bind(null, customer_id, periodFrom, periodTo)}
+            title={`${selectedCustomer?.name ?? ""} 거래명세서`}
+            description={`기간: ${periodFrom} ~ ${periodTo}`}
+          />
+        </div>
       )}
 
       {customer_id && (
