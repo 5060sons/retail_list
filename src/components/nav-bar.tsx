@@ -13,8 +13,8 @@ const LINKS = [
   { href: "/payments", label: "수금/지급" },
   { href: "/closing/monthly", label: "월별 마감" },
   { href: "/closing/customer", label: "업체별 마감" },
-  { href: "/items", label: "품목" },
-  { href: "/customers", label: "거래처" },
+  { href: "/items", label: "품목관리" },
+  { href: "/customers", label: "거래처관리" },
   { href: "/settings", label: "설정" },
 ];
 
