@@ -9,12 +9,12 @@ import { signOut } from "@/app/login/actions";
 
 const LINKS = [
   { href: "/", label: "대시보드" },
-  { href: "/customers", label: "거래처" },
-  { href: "/items", label: "품목" },
-  { href: "/transactions", label: "거래" },
+  { href: "/transactions", label: "거래내역" },
   { href: "/payments", label: "수금/지급" },
   { href: "/closing/monthly", label: "월별 마감" },
   { href: "/closing/customer", label: "업체별 마감" },
+  { href: "/items", label: "품목" },
+  { href: "/customers", label: "거래처" },
   { href: "/settings", label: "설정" },
 ];
 
