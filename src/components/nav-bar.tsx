@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -25,7 +26,8 @@ export function NavBar({ profile }: { profile: Profile }) {
     <header className="border-b border-gray-200 bg-white">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3">
         <div className="flex items-center gap-6">
-          <Link href="/" className="text-sm font-semibold whitespace-nowrap">
+          <Link href="/" className="flex items-center gap-2 text-sm font-semibold whitespace-nowrap">
+            <Image src="/icon.png" alt="" width={24} height={24} className="rounded" />
             INK 거래 관리
           </Link>
           <nav className="hidden gap-1 md:flex">

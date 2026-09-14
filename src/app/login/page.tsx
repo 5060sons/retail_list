@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { signIn } from "./actions";
 
 export default async function LoginPage({
@@ -11,7 +12,8 @@ export default async function LoginPage({
     <div className="flex flex-1 items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
-          <h1 className="text-xl font-semibold">INK 거래 관리</h1>
+          <Image src="/icon.png" alt="" width={56} height={56} className="mx-auto rounded" />
+          <h1 className="mt-3 text-xl font-semibold">INK 거래 관리</h1>
           <p className="mt-1 text-sm text-gray-500">로그인</p>
         </div>
 

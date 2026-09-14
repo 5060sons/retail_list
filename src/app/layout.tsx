@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "INK 거래 관리",
   description: "거래처 거래 내역 및 수금/지급 관리",
+  icons: { icon: "/icon.png" },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

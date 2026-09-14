@@ -74,7 +74,7 @@ export function KakaoShareButton({
       content: {
         title,
         description,
-        imageUrl: `${window.location.origin}/share-thumbnail.png`,
+        imageUrl: `${window.location.origin}/icon.png`,
         link: { mobileWebUrl: result.url, webUrl: result.url },
       },
       buttons: [
