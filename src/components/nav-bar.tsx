@@ -26,7 +26,7 @@ export function NavBar({ profile }: { profile: Profile }) {
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3">
         <div className="flex items-center gap-6">
           <Link href="/" className="text-sm font-semibold whitespace-nowrap">
-            거래 관리
+            INK 거래 관리
           </Link>
           <nav className="hidden gap-1 md:flex">
             {LINKS.map((link) => {
