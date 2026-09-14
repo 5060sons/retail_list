@@ -3,6 +3,7 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { requireProfile } from "@/lib/auth";
 import { getMonthlyStatementData } from "@/lib/pdf/monthly-data";
 import { MonthlyStatementDocument } from "@/lib/pdf/statement-document";
+import { contentDisposition } from "@/lib/pdf/content-disposition";
 
 export async function GET(request: NextRequest) {
   await requireProfile();
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `inline; filename="monthly-statement-${yearMonth}.pdf"`,
+      "Content-Disposition": contentDisposition(`monthly-statement-${yearMonth}.pdf`),
     },
   });
 }

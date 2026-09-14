@@ -2,7 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/auth";
-import { formatCurrency } from "@/lib/format";
+import { balanceLabel, formatCurrency, paymentLabel, transactionDirectionLabel } from "@/lib/format";
+import { PartnerBadge } from "@/components/partner-badge";
 import { deleteCustomer } from "../actions";
 import type { Customer, CustomerLedgerEntry } from "@/lib/supabase/types";
 
@@ -30,12 +31,18 @@ export default async function CustomerDetailPage({
   const typedCustomer = customer as Customer;
   const entries = (ledger ?? []) as CustomerLedgerEntry[];
   const currentBalance = entries[0]?.running_balance ?? typedCustomer.opening_balance;
+  const partnerType = typedCustomer.partner_type;
+  const txnLabel = transactionDirectionLabel(partnerType);
+  const payLabel = paymentLabel(partnerType);
 
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-lg font-semibold">{typedCustomer.name}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-semibold">{typedCustomer.name}</h1>
+            <PartnerBadge partnerType={partnerType} />
+          </div>
           <p className="text-sm text-gray-500">
             {typedCustomer.manager_name && `담당자: ${typedCustomer.manager_name} · `}
             {typedCustomer.phone ?? ""}
@@ -63,7 +70,7 @@ export default async function CustomerDetailPage({
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="rounded-md border border-gray-200 bg-white p-4">
-          <p className="text-xs text-gray-500">현재 거래잔액</p>
+          <p className="text-xs text-gray-500">현재 {balanceLabel(partnerType)}</p>
           <p
             className={`mt-1 text-lg font-semibold ${
               currentBalance > 0 ? "text-red-600" : "text-gray-900"
@@ -85,13 +92,13 @@ export default async function CustomerDetailPage({
           href={`/transactions/new?customer_id=${id}`}
           className="rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800"
         >
-          + 거래 등록
+          + {txnLabel} 등록
         </Link>
         <Link
           href={`/payments?customer_id=${id}`}
           className="rounded-md border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50"
         >
-          + 수금 등록
+          + {payLabel} 등록
         </Link>
         <Link
           href={`/closing/customer?customer_id=${id}`}
@@ -102,7 +109,7 @@ export default async function CustomerDetailPage({
       </div>
 
       <div>
-        <h2 className="mb-2 text-sm font-semibold">거래/수금 이력</h2>
+        <h2 className="mb-2 text-sm font-semibold">{txnLabel}/{payLabel} 이력</h2>
         <div className="overflow-x-auto rounded-md border border-gray-200 bg-white">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-left text-gray-500">
@@ -110,7 +117,7 @@ export default async function CustomerDetailPage({
                 <th className="px-4 py-2 font-medium">일자</th>
                 <th className="px-4 py-2 font-medium">구분</th>
                 <th className="px-4 py-2 font-medium text-right">금액</th>
-                <th className="px-4 py-2 font-medium text-right">거래잔액</th>
+                <th className="px-4 py-2 font-medium text-right">{balanceLabel(partnerType)}</th>
               </tr>
             </thead>
             <tbody>
@@ -123,10 +130,10 @@ export default async function CustomerDetailPage({
                         href={`/transactions/${e.transaction_id}/edit`}
                         className="hover:underline"
                       >
-                        거래
+                        {txnLabel}
                       </Link>
                     ) : (
-                      "수금"
+                      payLabel
                     )}
                   </td>
                   <td
@@ -145,7 +152,7 @@ export default async function CustomerDetailPage({
               {entries.length === 0 && (
                 <tr>
                   <td colSpan={4} className="px-4 py-6 text-center text-gray-500">
-                    거래/수금 이력이 없습니다.
+                    이력이 없습니다.
                   </td>
                 </tr>
               )}

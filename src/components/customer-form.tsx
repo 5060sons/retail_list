@@ -14,6 +14,29 @@ export function CustomerForm({
       {error && (
         <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
       )}
+      <fieldset className="text-sm">
+        <legend className="mb-1 text-gray-700">거래처 유형 *</legend>
+        <div className="flex gap-4">
+          <label className="flex items-center gap-1.5">
+            <input
+              type="radio"
+              name="partner_type"
+              value="customer"
+              defaultChecked={(customer?.partner_type ?? "customer") === "customer"}
+            />
+            공급거래처 (매출)
+          </label>
+          <label className="flex items-center gap-1.5">
+            <input
+              type="radio"
+              name="partner_type"
+              value="supplier"
+              defaultChecked={customer?.partner_type === "supplier"}
+            />
+            수급거래처 (매입)
+          </label>
+        </div>
+      </fieldset>
       <Field label="거래처명 *" name="name" defaultValue={customer?.name} required />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field

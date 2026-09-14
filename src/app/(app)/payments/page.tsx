@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, paymentLabel } from "@/lib/format";
 import { createPayment, deletePayment } from "./actions";
-import type { Customer, Payment } from "@/lib/supabase/types";
+import type { Customer, Payment, PartnerType } from "@/lib/supabase/types";
 
 export default async function PaymentsPage({
   searchParams,
@@ -21,18 +21,24 @@ export default async function PaymentsPage({
           .order("payment_date", { ascending: false })
       : supabase
           .from("payments")
-          .select("*, customers ( name )")
+          .select("*, customers ( name, partner_type )")
           .order("payment_date", { ascending: false })
           .limit(50),
   ]);
 
-  const payments = (paymentsRes.data ?? []) as (Payment & { customers?: { name: string } })[];
+  const payments = (paymentsRes.data ?? []) as (Payment & {
+    customers?: { name: string; partner_type: PartnerType };
+  })[];
   const typedCustomers = (customers ?? []) as Customer[];
   const selectedCustomer = typedCustomers.find((c) => c.id === customer_id);
 
+  const pageTitle = selectedCustomer
+    ? `${selectedCustomer.name} ${paymentLabel(selectedCustomer.partner_type)} 내역`
+    : "수금/지급 관리";
+
   return (
     <div className="space-y-6">
-      <h1 className="text-lg font-semibold">수금 관리</h1>
+      <h1 className="text-lg font-semibold">{pageTitle}</h1>
 
       {error && (
         <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
@@ -52,13 +58,13 @@ export default async function PaymentsPage({
             </option>
             {typedCustomers.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.name}
+                {c.name} ({paymentLabel(c.partner_type)})
               </option>
             ))}
           </select>
         </label>
         <label>
-          <span className="mb-1 block text-gray-700">수금일 *</span>
+          <span className="mb-1 block text-gray-700">일자 *</span>
           <input
             type="date"
             name="payment_date"
@@ -68,7 +74,7 @@ export default async function PaymentsPage({
           />
         </label>
         <label>
-          <span className="mb-1 block text-gray-700">수금액 *</span>
+          <span className="mb-1 block text-gray-700">금액 *</span>
           <input
             type="number"
             name="amount"
@@ -77,7 +83,7 @@ export default async function PaymentsPage({
           />
         </label>
         <label>
-          <span className="mb-1 block text-gray-700">수금방법</span>
+          <span className="mb-1 block text-gray-700">방법</span>
           <input
             name="method"
             placeholder="계좌이체 등"
@@ -89,13 +95,13 @@ export default async function PaymentsPage({
           <input name="memo" className="rounded-md border border-gray-300 px-2 py-1.5" />
         </label>
         <button type="submit" className="rounded-md bg-gray-900 px-4 py-2 text-white">
-          수금 등록
+          등록
         </button>
       </form>
 
       {selectedCustomer && (
         <p className="text-sm text-gray-500">
-          {selectedCustomer.name}의 수금 내역만 표시 중입니다. -{" "}
+          {selectedCustomer.name}의 내역만 표시 중입니다. -{" "}
           <a href="/payments" className="underline">
             전체 보기
           </a>
@@ -106,35 +112,40 @@ export default async function PaymentsPage({
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-left text-gray-500">
             <tr>
-              <th className="px-4 py-2 font-medium">수금일</th>
+              <th className="px-4 py-2 font-medium">일자</th>
               {!customer_id && <th className="px-4 py-2 font-medium">거래처</th>}
-              <th className="px-4 py-2 font-medium text-right">수금액</th>
+              <th className="px-4 py-2 font-medium">구분</th>
+              <th className="px-4 py-2 font-medium text-right">금액</th>
               <th className="px-4 py-2 font-medium">방법</th>
               <th className="px-4 py-2 font-medium">메모</th>
               <th className="px-4 py-2 font-medium text-right">관리</th>
             </tr>
           </thead>
           <tbody>
-            {payments.map((p) => (
-              <tr key={p.id} className="border-t border-gray-100">
-                <td className="px-4 py-2">{p.payment_date}</td>
-                {!customer_id && <td className="px-4 py-2">{p.customers?.name ?? "-"}</td>}
-                <td className="px-4 py-2 text-right">{formatCurrency(p.amount)}</td>
-                <td className="px-4 py-2 text-gray-600">{p.method ?? "-"}</td>
-                <td className="px-4 py-2 text-gray-600">{p.memo ?? "-"}</td>
-                <td className="px-4 py-2 text-right">
-                  <form action={deletePayment.bind(null, p.id, p.customer_id)}>
-                    <button type="submit" className="text-red-600 hover:underline">
-                      삭제
-                    </button>
-                  </form>
-                </td>
-              </tr>
-            ))}
+            {payments.map((p) => {
+              const partnerType = selectedCustomer?.partner_type ?? p.customers?.partner_type ?? "customer";
+              return (
+                <tr key={p.id} className="border-t border-gray-100">
+                  <td className="px-4 py-2">{p.payment_date}</td>
+                  {!customer_id && <td className="px-4 py-2">{p.customers?.name ?? "-"}</td>}
+                  <td className="px-4 py-2">{paymentLabel(partnerType)}</td>
+                  <td className="px-4 py-2 text-right">{formatCurrency(p.amount)}</td>
+                  <td className="px-4 py-2 text-gray-600">{p.method ?? "-"}</td>
+                  <td className="px-4 py-2 text-gray-600">{p.memo ?? "-"}</td>
+                  <td className="px-4 py-2 text-right">
+                    <form action={deletePayment.bind(null, p.id, p.customer_id)}>
+                      <button type="submit" className="text-red-600 hover:underline">
+                        삭제
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              );
+            })}
             {payments.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-gray-500">
-                  수금 내역이 없습니다.
+                <td colSpan={7} className="px-4 py-6 text-center text-gray-500">
+                  등록된 내역이 없습니다.
                 </td>
               </tr>
             )}

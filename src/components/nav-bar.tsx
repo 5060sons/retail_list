@@ -11,7 +11,7 @@ const LINKS = [
   { href: "/customers", label: "거래처" },
   { href: "/items", label: "품목" },
   { href: "/transactions", label: "거래" },
-  { href: "/payments", label: "수금" },
+  { href: "/payments", label: "수금/지급" },
   { href: "/closing/monthly", label: "월별 마감" },
   { href: "/closing/customer", label: "업체별 마감" },
   { href: "/settings", label: "설정" },
@@ -26,7 +26,7 @@ export function NavBar({ profile }: { profile: Profile }) {
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3">
         <div className="flex items-center gap-6">
           <Link href="/" className="text-sm font-semibold whitespace-nowrap">
-            공급 거래 관리
+            거래 관리
           </Link>
           <nav className="hidden gap-1 md:flex">
             {LINKS.map((link) => {

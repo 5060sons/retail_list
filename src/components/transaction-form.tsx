@@ -3,6 +3,8 @@
 import { useState } from "react";
 import type { Customer, Item, Transaction, TransactionLine } from "@/lib/supabase/types";
 
+type Direction = "sale" | "purchase";
+
 interface LineRow {
   key: number;
   item_id: string;
@@ -15,6 +17,11 @@ interface LineRow {
 let keySeq = 0;
 function newRow(): LineRow {
   return { key: keySeq++, item_id: "", item_name: "", line_type: "sale", unit_price: 0, quantity: 1 };
+}
+
+function directionOf(customers: Customer[], customerId?: string): Direction {
+  const customer = customers.find((c) => c.id === customerId);
+  return customer?.partner_type === "supplier" ? "purchase" : "sale";
 }
 
 export function TransactionForm({
@@ -34,6 +41,12 @@ export function TransactionForm({
   lines?: TransactionLine[];
   error?: string;
 }) {
+  const initialCustomerId = transaction?.customer_id ?? defaultCustomerId ?? "";
+  const [direction, setDirection] = useState<Direction>(() =>
+    directionOf(customers, initialCustomerId)
+  );
+  const [customerId, setCustomerId] = useState(initialCustomerId);
+
   const [rows, setRows] = useState<LineRow[]>(() =>
     lines && lines.length > 0
       ? lines.map((l) => ({
@@ -60,6 +73,20 @@ export function TransactionForm({
     });
   }
 
+  function handleDirectionChange(next: Direction) {
+    setDirection(next);
+    // 현재 선택된 거래처가 새 구분과 맞지 않으면 초기화
+    const current = customers.find((c) => c.id === customerId);
+    const currentDirection = current?.partner_type === "supplier" ? "purchase" : "sale";
+    if (currentDirection !== next) {
+      setCustomerId("");
+    }
+  }
+
+  const filteredCustomers = customers.filter((c) =>
+    direction === "purchase" ? c.partner_type === "supplier" : c.partner_type !== "supplier"
+  );
+
   const supplyTotal = rows.reduce((sum, r) => sum + r.unit_price * r.quantity, 0);
   const vatTotal = Math.round(supplyTotal * 0.1);
 
@@ -69,24 +96,53 @@ export function TransactionForm({
         <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
       )}
 
+      <fieldset className="text-sm">
+        <legend className="mb-1 text-gray-700">거래구분 *</legend>
+        <div className="flex gap-4">
+          <label className="flex items-center gap-1.5">
+            <input
+              type="radio"
+              checked={direction === "sale"}
+              onChange={() => handleDirectionChange("sale")}
+            />
+            매출 (공급거래처)
+          </label>
+          <label className="flex items-center gap-1.5">
+            <input
+              type="radio"
+              checked={direction === "purchase"}
+              onChange={() => handleDirectionChange("purchase")}
+            />
+            매입 (수급거래처)
+          </label>
+        </div>
+      </fieldset>
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <label className="block text-sm">
           <span className="mb-1 block text-gray-700">거래처 *</span>
           <select
             name="customer_id"
             required
-            defaultValue={transaction?.customer_id ?? defaultCustomerId ?? ""}
+            value={customerId}
+            onChange={(e) => setCustomerId(e.target.value)}
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
           >
             <option value="" disabled>
               선택
             </option>
-            {customers.map((c) => (
+            {filteredCustomers.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
               </option>
             ))}
           </select>
+          {filteredCustomers.length === 0 && (
+            <p className="mt-1 text-xs text-amber-600">
+              {direction === "purchase" ? "등록된 수급거래처가 없습니다." : "등록된 공급거래처가 없습니다."}{" "}
+              거래처를 먼저 등록해주세요.
+            </p>
+          )}
         </label>
         <label className="block text-sm">
           <span className="mb-1 block text-gray-700">거래일 *</span>
@@ -183,7 +239,7 @@ export function TransactionForm({
                         row.line_type === "sample" ? "bg-amber-50 text-amber-700" : "bg-transparent"
                       }`}
                     >
-                      <option value="sale">판매</option>
+                      <option value="sale">{direction === "purchase" ? "구매" : "판매"}</option>
                       <option value="sample">샘플</option>
                     </select>
                   </td>

@@ -8,6 +8,7 @@ import { requireAdmin, requireProfile } from "@/lib/auth";
 function readCustomerFields(formData: FormData) {
   return {
     name: String(formData.get("name") ?? "").trim(),
+    partner_type: String(formData.get("partner_type") ?? "customer") === "supplier" ? "supplier" : "customer",
     biz_reg_no: emptyToNull(formData.get("biz_reg_no")),
     ceo_name: emptyToNull(formData.get("ceo_name")),
     phone: emptyToNull(formData.get("phone")),

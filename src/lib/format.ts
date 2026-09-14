@@ -1,5 +1,27 @@
+import type { PartnerType } from "@/lib/supabase/types";
+
 export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("ko-KR").format(Math.round(amount)) + "원";
+}
+
+export function isSupplier(partnerType: PartnerType): boolean {
+  return partnerType === "supplier";
+}
+
+export function partnerTypeLabel(partnerType: PartnerType): string {
+  return isSupplier(partnerType) ? "수급거래처" : "공급거래처";
+}
+
+export function transactionDirectionLabel(partnerType: PartnerType): string {
+  return isSupplier(partnerType) ? "매입" : "매출";
+}
+
+export function paymentLabel(partnerType: PartnerType): string {
+  return isSupplier(partnerType) ? "지급" : "수금";
+}
+
+export function balanceLabel(partnerType: PartnerType): string {
+  return isSupplier(partnerType) ? "미지급금" : "미수금";
 }
 
 export function formatDate(date: string): string {

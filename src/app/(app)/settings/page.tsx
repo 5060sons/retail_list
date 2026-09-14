@@ -1,7 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/auth";
 import { RoleSelect } from "@/components/role-select";
-import { updateCompanySettings, updateMyName, updateUserRole } from "./actions";
+import { DeleteUserButton } from "@/components/delete-user-button";
+import {
+  createStaffAccount,
+  deleteStaffAccount,
+  updateCompanySettings,
+  updateMyName,
+  updateMyPassword,
+  updateUserRole,
+} from "./actions";
 import type { CompanySettings, Profile } from "@/lib/supabase/types";
 
 export default async function SettingsPage({
@@ -33,7 +41,7 @@ export default async function SettingsPage({
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold">내 정보</h2>
-        <form action={updateMyName} className="flex items-end gap-3 rounded-md border border-gray-200 bg-white p-4 text-sm">
+        <form action={updateMyName} className="flex flex-wrap items-end gap-3 rounded-md border border-gray-200 bg-white p-4 text-sm">
           <label>
             <span className="mb-1 block text-gray-700">이름</span>
             <input
@@ -44,6 +52,22 @@ export default async function SettingsPage({
           </label>
           <button type="submit" className="rounded-md bg-gray-900 px-4 py-2 text-white">
             저장
+          </button>
+        </form>
+        <form action={updateMyPassword} className="flex flex-wrap items-end gap-3 rounded-md border border-gray-200 bg-white p-4 text-sm">
+          <label>
+            <span className="mb-1 block text-gray-700">새 비밀번호</span>
+            <input
+              name="password"
+              type="password"
+              required
+              minLength={6}
+              placeholder="6자 이상"
+              className="rounded-md border border-gray-300 px-3 py-2"
+            />
+          </label>
+          <button type="submit" className="rounded-md border border-gray-300 px-4 py-2 hover:bg-gray-50">
+            비밀번호 변경
           </button>
         </form>
       </section>
@@ -76,6 +100,36 @@ export default async function SettingsPage({
       {profile.role === "admin" && profiles && (
         <section className="space-y-3">
           <h2 className="text-sm font-semibold">사용자 관리</h2>
+
+          <form
+            action={createStaffAccount}
+            className="flex flex-wrap items-end gap-3 rounded-md border border-gray-200 bg-white p-4 text-sm"
+          >
+            <label>
+              <span className="mb-1 block text-gray-700">이름 *</span>
+              <input name="name" required className="rounded-md border border-gray-300 px-3 py-2" />
+            </label>
+            <label>
+              <span className="mb-1 block text-gray-700">이메일 *</span>
+              <input
+                name="email"
+                type="email"
+                required
+                className="rounded-md border border-gray-300 px-3 py-2"
+              />
+            </label>
+            <label>
+              <span className="mb-1 block text-gray-700">권한</span>
+              <select name="role" defaultValue="staff" className="rounded-md border border-gray-300 px-3 py-2">
+                <option value="staff">직원</option>
+                <option value="admin">관리자</option>
+              </select>
+            </label>
+            <button type="submit" className="rounded-md bg-gray-900 px-4 py-2 text-white">
+              계정 생성
+            </button>
+          </form>
+
           <div className="overflow-x-auto rounded-md border border-gray-200 bg-white">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 text-left text-gray-500">
@@ -83,6 +137,7 @@ export default async function SettingsPage({
                   <th className="px-4 py-2 font-medium">이름</th>
                   <th className="px-4 py-2 font-medium">이메일</th>
                   <th className="px-4 py-2 font-medium">권한</th>
+                  <th className="px-4 py-2 font-medium text-right">관리</th>
                 </tr>
               </thead>
               <tbody>
@@ -97,13 +152,21 @@ export default async function SettingsPage({
                         disabled={p.id === profile.id}
                       />
                     </td>
+                    <td className="px-4 py-2 text-right">
+                      <DeleteUserButton
+                        action={deleteStaffAccount.bind(null, p.id)}
+                        userName={p.name}
+                        disabled={p.id === profile.id}
+                      />
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
           <p className="text-xs text-gray-500">
-            새 직원은 로그인 화면에서 &ldquo;계정 만들기&rdquo;로 직접 가입하면 자동으로 직원 권한이 부여됩니다.
+            계정 생성 시 임시 비밀번호가 자동 발급되어 화면에 한 번 표시됩니다. 직원에게 전달해주시고,
+            로그인 후 &ldquo;내 정보&rdquo;에서 비밀번호를 변경하도록 안내해주세요.
           </p>
         </section>
       )}

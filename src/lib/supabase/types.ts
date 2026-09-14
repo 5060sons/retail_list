@@ -3,6 +3,8 @@
 
 export type Role = "admin" | "staff";
 export type TransactionType = "sale" | "sample";
+// 'customer' = 공급거래처(매출 대상), 'supplier' = 수급거래처(매입 대상)
+export type PartnerType = "customer" | "supplier";
 
 export interface Profile {
   id: string;
@@ -15,6 +17,7 @@ export interface Profile {
 export interface Customer {
   id: string;
   name: string;
+  partner_type: PartnerType;
   biz_reg_no: string | null;
   ceo_name: string | null;
   phone: string | null;
@@ -118,6 +121,7 @@ export interface CustomerBalance {
   customer_id: string;
   name: string;
   balance: number;
+  partner_type: PartnerType;
 }
 
 export interface TransactionWithLines extends Transaction {

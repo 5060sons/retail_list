@@ -73,6 +73,8 @@ insert into public.company_settings (id) values (true);
 create table public.customers (
   id uuid primary key default gen_random_uuid(),
   name text not null,
+  -- 'customer' = 공급거래처(매출 대상, 우리가 판매), 'supplier' = 수급거래처(매입 대상, 우리가 구매)
+  partner_type text not null default 'customer' check (partner_type in ('customer', 'supplier')),
   biz_reg_no text,
   ceo_name text,
   phone text,
@@ -84,7 +86,7 @@ create table public.customers (
   opening_balance numeric not null default 0,
   memo text,
   created_at timestamptz not null default now(),
-  created_by uuid references public.profiles (id)
+  created_by uuid references public.profiles (id) on delete set null
 );
 
 -- =========================================
@@ -96,7 +98,7 @@ create table public.items (
   unit text,
   default_unit_price numeric not null default 0,
   created_at timestamptz not null default now(),
-  created_by uuid references public.profiles (id)
+  created_by uuid references public.profiles (id) on delete set null
 );
 
 -- =========================================
@@ -106,7 +108,7 @@ create table public.monthly_closings (
   id uuid primary key default gen_random_uuid(),
   year_month text not null unique, -- 'YYYY-MM'
   closed_at timestamptz not null default now(),
-  closed_by uuid references public.profiles (id)
+  closed_by uuid references public.profiles (id) on delete set null
 );
 
 create table public.customer_closings (
@@ -115,7 +117,7 @@ create table public.customer_closings (
   period_start date not null,
   period_end date not null,
   closed_at timestamptz not null default now(),
-  closed_by uuid references public.profiles (id)
+  closed_by uuid references public.profiles (id) on delete set null
 );
 
 -- =========================================
@@ -129,7 +131,7 @@ create table public.transactions (
   monthly_closing_id uuid references public.monthly_closings (id),
   customer_closing_id uuid references public.customer_closings (id),
   created_at timestamptz not null default now(),
-  created_by uuid references public.profiles (id)
+  created_by uuid references public.profiles (id) on delete set null
 );
 
 -- 판매/샘플 구분은 거래(헤더)가 아니라 품목 라인 단위로 관리한다.
@@ -161,7 +163,7 @@ create table public.payments (
   method text,
   memo text,
   created_at timestamptz not null default now(),
-  created_by uuid references public.profiles (id)
+  created_by uuid references public.profiles (id) on delete set null
 );
 
 create index on public.payments (customer_id, payment_date);
@@ -206,20 +208,26 @@ select
 from entries e
 join public.customers c on c.id = e.customer_id;
 
--- 거래처별 "현재" 거래잔액 (거래/수금이 없는 거래처는 opening_balance 그대로 표시)
+-- 거래처별 "현재" 거래잔액. customer_ledger의 "마지막 행"을 집는 방식 대신 직접 합산한다 —
+-- 거래와 수금이 같은 날짜(특히 같은 트랜잭션 내 동일 now())에 발생하면 entry_created_at으로도
+-- 순서를 구분 못 해 최신 행을 잘못 고를 수 있기 때문.
 create or replace view public.customer_balances
 with (security_invoker = true) as
-with latest as (
-  select distinct on (customer_id) customer_id, running_balance
-  from public.customer_ledger
-  order by customer_id, entry_date desc, entry_created_at desc
-)
 select
   c.id as customer_id,
   c.name,
-  coalesce(latest.running_balance, c.opening_balance) as balance
-from public.customers c
-left join latest on latest.customer_id = c.id;
+  c.opening_balance
+    + coalesce((
+        select sum(tl.supply_amount + tl.vat_amount)
+        from public.transactions t
+        join public.transaction_lines tl on tl.transaction_id = t.id
+        where t.customer_id = c.id
+      ), 0)
+    - coalesce((
+        select sum(p.amount) from public.payments p where p.customer_id = c.id
+      ), 0) as balance,
+  c.partner_type
+from public.customers c;
 
 -- =========================================
 -- 8. RLS 활성화 및 정책

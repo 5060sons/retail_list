@@ -3,6 +3,7 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { requireProfile } from "@/lib/auth";
 import { getCustomerStatementData } from "@/lib/pdf/statement-data";
 import { CustomerStatementDocument } from "@/lib/pdf/statement-document";
+import { contentDisposition } from "@/lib/pdf/content-disposition";
 
 export async function GET(request: NextRequest) {
   await requireProfile();
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `inline; filename="statement-${data.customer.name}-${from}_${to}.pdf"`,
+      "Content-Disposition": contentDisposition(`statement-${data.customer.name}-${from}_${to}.pdf`),
     },
   });
 }

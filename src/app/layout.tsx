@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "공급 거래 내역 관리",
-  description: "거래처 공급 거래 내역 및 수금 관리",
+  title: "거래 관리",
+  description: "거래처 거래 내역 및 수금/지급 관리",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

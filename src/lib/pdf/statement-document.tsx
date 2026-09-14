@@ -95,27 +95,41 @@ function won(n: number) {
 export function StatementPage({ data }: { data: CustomerStatementData }) {
   const { customer, company, from, to, openingBalance, lines, payments, totalSupply, totalVat, totalPayment, closingBalance } = data;
 
+  const isPurchase = customer.partner_type === "supplier";
+  const directionTag = isPurchase ? "[매입]" : "[매출]";
+
+  const companyBox = (
+    <>
+      <Text style={styles.partyLine}>상호: {company?.name ?? "-"}</Text>
+      <Text style={styles.partyLine}>사업자번호: {company?.biz_reg_no ?? "-"}</Text>
+      <Text style={styles.partyLine}>대표자: {company?.ceo_name ?? "-"}</Text>
+      <Text style={styles.partyLine}>주소: {company?.address ?? "-"}</Text>
+      <Text style={styles.partyLine}>연락처: {company?.phone ?? "-"}</Text>
+    </>
+  );
+  const customerBox = (
+    <>
+      <Text style={styles.partyLine}>상호: {customer.name}</Text>
+      <Text style={styles.partyLine}>사업자번호: {customer.biz_reg_no ?? "-"}</Text>
+      <Text style={styles.partyLine}>대표자: {customer.ceo_name ?? "-"}</Text>
+      <Text style={styles.partyLine}>주소: {customer.address ?? "-"}</Text>
+      <Text style={styles.partyLine}>담당자: {customer.manager_name ?? "-"}</Text>
+    </>
+  );
+
   return (
       <Page size="A4" style={styles.page}>
-        <Text style={styles.title}>거래명세서</Text>
+        <Text style={styles.title}>거래명세서 {directionTag}</Text>
         <Text style={styles.subtitle}>기간: {from} ~ {to}</Text>
 
         <View style={styles.partiesRow}>
           <View style={styles.partyBox}>
             <Text style={styles.partyTitle}>공급자</Text>
-            <Text style={styles.partyLine}>상호: {company?.name ?? "-"}</Text>
-            <Text style={styles.partyLine}>사업자번호: {company?.biz_reg_no ?? "-"}</Text>
-            <Text style={styles.partyLine}>대표자: {company?.ceo_name ?? "-"}</Text>
-            <Text style={styles.partyLine}>주소: {company?.address ?? "-"}</Text>
-            <Text style={styles.partyLine}>연락처: {company?.phone ?? "-"}</Text>
+            {isPurchase ? customerBox : companyBox}
           </View>
           <View style={styles.partyBox}>
             <Text style={styles.partyTitle}>공급받는자</Text>
-            <Text style={styles.partyLine}>상호: {customer.name}</Text>
-            <Text style={styles.partyLine}>사업자번호: {customer.biz_reg_no ?? "-"}</Text>
-            <Text style={styles.partyLine}>대표자: {customer.ceo_name ?? "-"}</Text>
-            <Text style={styles.partyLine}>주소: {customer.address ?? "-"}</Text>
-            <Text style={styles.partyLine}>담당자: {customer.manager_name ?? "-"}</Text>
+            {isPurchase ? companyBox : customerBox}
           </View>
         </View>
 
@@ -138,7 +152,7 @@ export function StatementPage({ data }: { data: CustomerStatementData }) {
               <Text style={[styles.cell, styles.cSupply]}>{won(l.supply_amount)}</Text>
               <Text style={[styles.cell, styles.cVat]}>{won(l.vat_amount)}</Text>
               <Text style={[styles.cell, styles.cType, { borderRight: "none" }]}>
-                {l.transaction_type === "sale" ? "판매" : "샘플"}
+                {l.transaction_type === "sale" ? (isPurchase ? "구매" : "판매") : "샘플"}
               </Text>
             </View>
           ))}
@@ -165,22 +179,24 @@ export function StatementPage({ data }: { data: CustomerStatementData }) {
             <Text style={styles.summaryValue}>{won(totalVat)}</Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>당월 수금액</Text>
+            <Text style={styles.summaryLabel}>당월 {isPurchase ? "지급액" : "수금액"}</Text>
             <Text style={styles.summaryValue}>-{won(totalPayment)}</Text>
           </View>
           <View style={[styles.summaryRow, { marginTop: 4, borderTop: "1pt solid #d1d5db", paddingTop: 4 }]}>
-            <Text style={styles.summaryLabel}>거래잔액</Text>
+            <Text style={styles.summaryLabel}>{isPurchase ? "미지급금" : "미수금"}</Text>
             <Text style={styles.summaryValue}>{won(closingBalance)}</Text>
           </View>
         </View>
 
         {payments.length > 0 && (
           <View>
-            <Text style={styles.paymentsTitle}>수금 내역</Text>
+            <Text style={styles.paymentsTitle}>{isPurchase ? "지급" : "수금"} 내역</Text>
             <View style={styles.table}>
               <View style={styles.tableHeaderRow}>
-                <Text style={[styles.cell, { width: "20%" }]}>수금일</Text>
-                <Text style={[styles.cell, { width: "20%", textAlign: "right" }]}>수금액</Text>
+                <Text style={[styles.cell, { width: "20%" }]}>{isPurchase ? "지급일" : "수금일"}</Text>
+                <Text style={[styles.cell, { width: "20%", textAlign: "right" }]}>
+                  {isPurchase ? "지급액" : "수금액"}
+                </Text>
                 <Text style={[styles.cell, { width: "20%" }]}>방법</Text>
                 <Text style={[styles.cell, { width: "40%", borderRight: "none" }]}>메모</Text>
               </View>
