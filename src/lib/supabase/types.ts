@@ -124,6 +124,15 @@ export interface CustomerBalance {
   partner_type: PartnerType;
 }
 
+export interface StatementShare {
+  token: string;
+  customer_id: string;
+  period_start: string;
+  period_end: string;
+  created_by: string | null;
+  created_at: string;
+}
+
 export interface TransactionWithLines extends Transaction {
   transaction_lines: TransactionLine[];
   customers?: Pick<Customer, "id" | "name">;

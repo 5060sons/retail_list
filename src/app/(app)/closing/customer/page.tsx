@@ -2,7 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/auth";
 import { currentYearMonth, monthRange } from "@/lib/format";
 import { isEmailConfigured } from "@/lib/email";
-import { closeCustomerPeriod, sendStatementEmail } from "./actions";
+import { KakaoShareButton } from "@/components/kakao-share-button";
+import { closeCustomerPeriod, createShareLink, sendStatementEmail } from "./actions";
 import type { Customer, CustomerClosing } from "@/lib/supabase/types";
 
 export default async function CustomerClosingPage({
@@ -92,6 +93,11 @@ export default async function CustomerClosingPage({
           >
             거래명세서 PDF 보기/다운로드
           </a>
+          <KakaoShareButton
+            getShareUrl={createShareLink.bind(null, customer_id, periodFrom, periodTo)}
+            title={`${selectedCustomer?.name ?? ""} 거래명세서`}
+            description={`기간: ${periodFrom} ~ ${periodTo}`}
+          />
           {profile.role === "admin" && (
             <form action={closeCustomerPeriod}>
               <input type="hidden" name="customer_id" value={customer_id} />

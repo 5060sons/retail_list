@@ -1,5 +1,7 @@
 "use server";
 
+import { randomBytes } from "node:crypto";
+import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { renderToBuffer } from "@react-pdf/renderer";
@@ -96,4 +98,37 @@ export async function sendStatementEmail(formData: FormData) {
   }
 
   redirect(`${backTo}&message=` + encodeURIComponent(`${recipient}로 거래명세서를 발송했습니다.`));
+}
+
+export async function createShareLink(
+  customerId: string,
+  from: string,
+  to: string
+): Promise<{ url: string } | { error: string }> {
+  const profile = await requireProfile();
+
+  if (!customerId || !from || !to) {
+    return { error: "거래처와 기간을 선택해주세요." };
+  }
+
+  const token = randomBytes(20).toString("base64url");
+  const supabase = await createClient();
+
+  const { error } = await supabase.from("statement_shares").insert({
+    token,
+    customer_id: customerId,
+    period_start: from,
+    period_end: to,
+    created_by: profile.id,
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  const hdrs = await headers();
+  const host = hdrs.get("host") ?? "";
+  const proto = hdrs.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+
+  return { url: `${proto}://${host}/s/${token}` };
 }

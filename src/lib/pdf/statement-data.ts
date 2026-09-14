@@ -1,3 +1,4 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import type { CompanySettings, Customer, Payment } from "@/lib/supabase/types";
 
@@ -29,9 +30,11 @@ export interface CustomerStatementData {
 export async function getCustomerStatementData(
   customerId: string,
   from: string,
-  to: string
+  to: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  client?: SupabaseClient<any>
 ): Promise<CustomerStatementData | null> {
-  const supabase = await createClient();
+  const supabase = client ?? (await createClient());
 
   const [{ data: customer }, { data: company }, { data: priorLedger }] = await Promise.all([
     supabase.from("customers").select("*").eq("id", customerId).single(),

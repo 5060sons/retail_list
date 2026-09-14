@@ -230,6 +230,23 @@ select
 from public.customers c;
 
 -- =========================================
+-- 7b. statement_shares (카카오톡/링크 공유용 임시 토큰)
+-- =========================================
+-- 로그인 없이 특정 거래명세서 1건만 열람 가능한 공유 링크. token을 아는 것 자체가
+-- 열람 권한이므로(서명된 링크와 같은 개념), 공개 조회는 서버 라우트에서 service role로
+-- 처리하고 이 테이블 자체에는 anon 조회 정책을 두지 않는다(전체 목록 노출 방지).
+create table public.statement_shares (
+  token text primary key,
+  customer_id uuid not null references public.customers (id),
+  period_start date not null,
+  period_end date not null,
+  created_by uuid references public.profiles (id) on delete set null,
+  created_at timestamptz not null default now()
+);
+
+create index on public.statement_shares (customer_id);
+
+-- =========================================
 -- 8. RLS 활성화 및 정책
 -- =========================================
 alter table public.company_settings enable row level security;
@@ -241,6 +258,7 @@ alter table public.transaction_lines enable row level security;
 alter table public.payments enable row level security;
 alter table public.monthly_closings enable row level security;
 alter table public.customer_closings enable row level security;
+alter table public.statement_shares enable row level security;
 
 -- company_settings: 조회는 전체, 수정은 admin만.
 create policy "company_settings_select" on public.company_settings for select to authenticated using (true);
@@ -303,3 +321,8 @@ create policy "monthly_closings_delete" on public.monthly_closings for delete to
 create policy "customer_closings_select" on public.customer_closings for select to authenticated using (true);
 create policy "customer_closings_insert" on public.customer_closings for insert to authenticated with check (public.is_admin());
 create policy "customer_closings_delete" on public.customer_closings for delete to authenticated using (public.is_admin());
+
+-- statement_shares: 로그인 사용자는 생성/조회 가능. 공개(anon) 열람은 이 정책이 아니라
+-- 서버 라우트의 service role 클라이언트가 처리한다.
+create policy "statement_shares_select" on public.statement_shares for select to authenticated using (true);
+create policy "statement_shares_insert" on public.statement_shares for insert to authenticated with check (true);
