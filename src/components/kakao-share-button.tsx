@@ -10,17 +10,9 @@ declare global {
       init: (key: string) => void;
       Share: {
         sendDefault: (settings: {
-          objectType: "feed";
-          content: {
-            title: string;
-            description: string;
-            imageUrl: string;
-            link: { mobileWebUrl: string; webUrl: string };
-          };
-          buttons: {
-            title: string;
-            link: { mobileWebUrl: string; webUrl: string };
-          }[];
+          objectType: "text";
+          text: string;
+          link: { mobileWebUrl: string; webUrl: string };
         }) => void;
       };
     };
@@ -70,19 +62,9 @@ export function KakaoShareButton({
     }
 
     window.Kakao.Share.sendDefault({
-      objectType: "feed",
-      content: {
-        title,
-        description,
-        imageUrl: `${window.location.origin}/favicon.ico`,
-        link: { mobileWebUrl: result.url, webUrl: result.url },
-      },
-      buttons: [
-        {
-          title: "거래명세서 보기",
-          link: { mobileWebUrl: result.url, webUrl: result.url },
-        },
-      ],
+      objectType: "text",
+      text: `${title}\n${description}`,
+      link: { mobileWebUrl: result.url, webUrl: result.url },
     });
 
     setStatus("idle");
